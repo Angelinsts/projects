@@ -1,0 +1,265 @@
+create warehouse ineuron;
+use warehouse ineuron;
+--
+create database project;
+use database project;
+
+--TASK 1----------------------
+create table shopping_history (
+product varchar not null,
+    quantity int not null,
+    unit_price int not null
+);
+
+desc table shopping_history;
+
+insert into shopping_history
+values ('milk',3,10),
+('bread',7,3),
+('bread',5,2);
+
+select * from shopping_history;
+
+--total price calculated for each product
+select product,sum(unit_price*quantity) as total_price from shopping_history group by product;
+
+--END OF TASK 1----------------------
+
+--TASK 2-----------------------------
+create database telecom;
+use database telecom;
+
+create table phones(
+name varchar(20)  not null unique,
+phone_number int  not null unique);
+
+create table calls(
+id int not null,
+caller int not null,
+callee int not null,
+duration int not null,
+unique(id)
+);
+
+insert into  phones values('Jack',1234),
+('Lena',3333),('Mark',9999),('Anna',7582);
+
+select * from phones;
+
+insert into calls values('25',1234,7582,8),
+('7',9999,7582,1),
+('18',9999,3333,4),
+('2',7582,3333,3),
+('3',3333,1234,1),
+('21',3333,1234,1);
+select * from calls;
+
+--clients who talked more than 10 minutes
+
+select name from 
+(
+ select name,sum(duration) from phones
+ join calls
+ on (caller = phone_number or callee = phone_number )
+ group by name 
+ having sum(duration) >= 10 order by name
+) 
+total;
+-- NAME
+-- Anna
+-- Jack
+
+--backup--
+create table phones_hist(
+name varchar(20)  not null unique,
+phone_number int  not null unique);
+
+create table calls_hist(
+id int not null,
+caller int not null,
+callee int not null,
+duration int not null,
+unique(id)
+);
+
+insert  into phones_hist select * from phones;
+insert  into calls_hist select * from calls;
+delete from phones;
+delete from calls;
+-----
+insert into  phones values('John',6356),
+('Addison',4315),('Kate',8003),('Ginny',9831);
+
+select * from phones;
+
+insert into calls values('65',8003  ,9831,7),
+('100',9831,8003,3),
+('145',4315,9831,18);
+select * from calls;
+
+select name from 
+(
+ select name,sum(duration) from phones
+ join calls
+ on (caller = phone_number or callee = phone_number )
+ group by name 
+ having sum(duration) >= 10 order by name
+) 
+total;
+
+-- NAME
+-- Addison
+-- Ginny
+-- Kate
+---END OF TASK2-----
+
+------------TASK 3-------------
+create database bank;
+use database bank;
+create table transactions (
+       amount int not null,
+       date date not null
+);
+
+insert into transactions
+values 
+(1000,'2020-01-06'),
+(-10,'2020-01-14'),
+(-75,'2020-01-20'),
+(-5,'2020-01-25'),
+(-4,'2020-01-29'),
+(2000,'2020-03-10'),
+(-75,'2020-03-12'),
+(-20,'2020-03-15'),
+(40,'2020-03-15'),
+(-50,'2020-03-17'),
+(200,'2020-10-10'),
+(-200,'2020-10-10');
+--drop table transactions;
+select * from transactions;
+
+-- AMOUNT	DATE
+-- 1,000	2020-01-06
+-- -10	2020-01-14
+-- -75	2020-01-20
+-- -5	2020-01-25
+-- -4	2020-01-29
+-- 2,000	2020-03-10
+-- -75	2020-03-12
+-- -20	2020-03-15
+-- 40	2020-03-15
+-- -50	2020-03-17
+-- 200	2020-10-10
+-- -200	2020-10-10
+
+--balance after deducting credit_fee
+
+with temp
+as
+ (
+ select distinct
+        count( amount)   over (partition by month(date) )   number_of_payments,
+        sum(amount)   over (partition by month(date) )     monthly_payment
+ from transactions 
+       where amount < 0
+ )
+ select 
+       sum(amount) - (
+                      select 
+                            ( 12- count(monthly_payment)) * 5 credit_fee from temp 
+                      where abs(monthly_payment) >=100
+                            and number_of_payments  >=3
+                     )  balance
+ from  transactions;
+ 
+--  BALANCE
+-- 2,746
+
+-- delete from transactions;
+insert into transactions
+values 
+(1,'2020-06-29'),
+(35,'2020-02-20'),
+(-50,'2020-02-03'),
+(-1,'2020-02-26'),
+(-200,'2020-08-01'),
+(-44,'2020-02-07'),
+(-5,'2020-02-25'),
+(1,'2020-06-29'),
+(1,'2020-06-29'),
+(-100,'2020-12-29'),
+(-100,'2020-12-30'),
+(-100,'2020-12-31');
+
+select * from transactions;
+
+-- AMOUNT	DATE
+-- 1	2020-06-29
+-- 35	2020-02-20
+-- -50	2020-02-03
+-- -1	2020-02-26
+-- -200	2020-08-01
+-- -44	2020-02-07
+-- -5	2020-02-25
+-- 1	2020-06-29
+-- 1	2020-06-29
+-- -100	2020-12-29
+-- -100	2020-12-30
+-- -100	2020-12-31
+
+
+-- BALANCE
+-- -612
+
+-- delete from transactions;
+insert into transactions
+values 
+(6000,'2020-04-03'),
+(5000,'2020-04-02'),
+(4000,'2020-04-01'),
+(3000,'2020-03-01'),
+(2000,'2020-02-01'),
+(1000,'2020-01-01');
+
+select * from transactions; 
+
+-- AMOUNT	DATE
+-- 6,000	2020-04-03
+-- 5,000	2020-04-02
+-- 4,000	2020-04-01
+-- 3,000	2020-03-01
+-- 2,000	2020-02-01
+-- 1,000	2020-01-01
+ 
+
+     
+ 
+
+
+                 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
